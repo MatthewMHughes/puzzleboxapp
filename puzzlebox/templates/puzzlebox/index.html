@@ -1,0 +1,293 @@
+{% extends "master.html" %}
+{% load static %}
+{% load bootstrap_icons %}
+<link rel="stylesheet" href="{% static 'polls/style.css' %}">
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap 5 Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="row">
+        <h1>Welcome user: </h1>
+        <h1 id="username"></h1>
+      </div>
+      <h3>Ragnvald Halvardson's Spells to Survive the Straussi Remnants</h3>
+      <p>Victor is the pig and mathematical constant found within a cheat</p>
+      <div class="row">
+        {% for dial in dials %}
+          <div class="col">
+            <p id="position_{{ dial.dialNumber }}"></p>
+            <div class="row">
+              <p id="piston_{{ dial.dialNumber }}_5"></p>
+            </div>
+            <div class="row">
+              <p id="piston_{{ dial.dialNumber }}_4"></p>
+            </div>
+            <div class="row">
+              <p id="piston_{{ dial.dialNumber }}_3"></p>
+            </div>
+            <div class="row">
+              <p id="piston_{{ dial.dialNumber }}_2"></p>
+            </div>
+            <div class="row">
+              <p id="piston_{{ dial.dialNumber }}_1"></p>
+            </div>
+            <div class="row">
+              <p id="piston_{{ dial.dialNumber }}_0"></p>
+            </div>
+            <button type="button" class="btn btn-light" onclick="moveUp({{ dial }})">{% bs_icon 'arrow-up' color='black' %}</button>
+            <h1 id="input_{{ dial.dialNumber }}"></h1>
+            <button type="button" class="btn btn-light" onclick="moveDown({{ dial }})">{% bs_icon 'arrow-down' color='black' %}</button>
+          </div>
+        {% endfor %}
+      </div>
+      <p>Wise professor at broken river's first school</p>
+    </div>
+  </div>
+  <div class="row">
+    <h1 id="test"></h1>
+  </div>
+</div>
+{% load js %}
+<script>
+
+  function nextCharacter(c) {
+    letter = String.fromCharCode(c.charCodeAt(0) + 1);
+    if(letter == "["){
+      letter = "A";
+    }
+    return letter;
+  }
+
+  function prevCharacter(c) {
+    letter = String.fromCharCode(c.charCodeAt(0) - 1);
+    if(letter == "@"){
+      letter = "Z";
+    }
+    return letter;
+  }
+
+  function getToken(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0,name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function movePiston(pistonNumber, direction) {
+    for(let i = 0; i <= 5; i++){
+      var piston = document.getElementById('piston_' + pistonNumber + "_" + i.toString());
+      if(piston.textContent === "--- <--"){
+        currPiston = i;
+        piston.innerHTML = "---";
+        if(direction === 1){
+          if(currPiston === 5){
+            currPiston = 0;
+          }else{
+            currPiston++;
+          }
+        }else{
+          if(currPiston === 0){
+            currPiston = 5;
+          }else{
+            currPiston--;
+          }
+        }
+        var newPiston = document.getElementById('piston_' + pistonNumber + "_" + currPiston.toString());
+        newPiston.innerHTML = "--- <--";
+        break;
+      }
+    }
+  }
+
+  function sendMovePostRequest(dial, moveDir){
+    var url = "/puzzlebox/movedial"
+    var csrftoken = getToken('csrftoken')
+    console.log(url, csrftoken, JSON.stringify({'post_data':{"dialNumber": dial.dialNumber, "moveDir": moveDir}}))
+    fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-CSRFToken':csrftoken,
+      }, 
+      body:JSON.stringify({'post_data':{"dialNumber": dial.dialNumber, "moveDir": moveDir}}) //JavaScript object of data to POST
+      })
+    .then((response) => {
+      console.log(response)
+      return response.json(); //converts response to json
+    })
+    .then((data) => {
+        console.log('data:',data)
+    //Perform actions with the response data from the view
+    });
+  }
+
+  function sendMovePostMessageRequest(dial, moveDir){
+    let username = document.getElementById("username").textContent;
+    var url = "/puzzlebox/sendMoveDialMessage"
+    var csrftoken = getToken('csrftoken')
+    let event = "moveUp";
+    if(moveDir === -1){
+      console.log(moveDir)
+      event = "moveDown"
+    }
+    fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-CSRFToken':csrftoken,
+      }, 
+      body:JSON.stringify({'post_data':{"dialNumber": dial.dialNumber, "event": event, "username": username}}) //JavaScript object of data to POST
+      })
+    .then((response) => {
+      console.log(response)
+      return response.json(); //converts response to json
+    })
+    .then((data) => {
+        console.log('data:',data)
+    //Perform actions with the response data from the view
+    });
+  }
+
+  function moveUp(dial) {
+    var position = document.getElementById('position_' + dial.dialNumber.toString());
+    currPosition = parseInt(position.textContent);
+    if(currPosition < 25){
+      sendMovePostRequest(dial, 1);
+      sendMovePostMessageRequest(dial, 1);
+      position.innerHTML = currPosition + 1;
+      movePiston(dial.dialNumber.toString(), 1);
+      movePiston(dial.firstLink.toString(), dial.firstLinkDir);
+      movePiston(dial.secondLink.toString(), dial.secondLinkDir);
+      var letter = document.getElementById('input_' + dial.dialNumber.toString());
+      letter.innerHTML = nextCharacter(letter.textContent);
+    }
+  }
+
+  function moveDown(dial) {
+    var position = document.getElementById('position_' + dial.dialNumber.toString());
+    currPosition = parseInt(position.textContent);
+    if(currPosition > -25){
+      sendMovePostRequest(dial, -1);
+      sendMovePostMessageRequest(dial, -1);
+      position.innerHTML = currPosition - 1;
+      movePiston(dial.dialNumber.toString(), -1);
+      movePiston(dial.firstLink.toString(), dial.firstLinkDir * -1);
+      movePiston(dial.secondLink.toString(), dial.secondLinkDir * -1);
+      var letter = document.getElementById('input_' + dial.dialNumber.toString())
+      letter.innerHTML = prevCharacter(letter.textContent);
+    }
+  }
+  var id = Math.floor(Math.random() * 1000000000);
+  var username = document.getElementById("username")
+  username.innerHTML = id;
+  
+  var dials = {{ dials | js }};
+   Pusher.logToConsole = true;
+
+  var pusher = new Pusher('983d24044a46cf1a6470', {
+    cluster: 'eu'
+  });
+
+  var channel = pusher.subscribe('puzzlebox');
+  
+  channel.bind('pusher:subscription_succeeded', function(members) {
+    console.log("binded!")
+  });
+
+  channel.bind('moveUp', function(data) {
+    console.log("moveUp ", data)
+    let username = document.getElementById("username").textContent;
+    if(data.username !== username){
+      for(let dial of dials){
+        console.log(data, data.dialNumber)
+        console.log(dial.dialNumber, parseInt(data.dialNumber), dial.dialNumber === parseInt(data.dialNumber))
+        if(dial.dialNumber === parseInt(data.dialNumber)){
+          var position = document.getElementById('position_' + dial.dialNumber.toString());
+          currPosition = parseInt(position.textContent);
+          if(currPosition < 25){
+            position.innerHTML = currPosition + 1;
+            movePiston(dial.dialNumber.toString(), 1);
+            movePiston(dial.firstLink.toString(), dial.firstLinkDir);
+            movePiston(dial.secondLink.toString(), dial.secondLinkDir);
+            var letter = document.getElementById('input_' + dial.dialNumber.toString());
+            letter.innerHTML = nextCharacter(letter.textContent);
+          }
+        }
+      } 
+    }
+  });
+
+  channel.bind('moveDown', function(data) {
+    console.log("moveDown ", data)
+    let username = document.getElementById("username").textContent;
+    if(data.username !== username){
+      for(let dial of dials){
+        if(dial.dialNumber === parseInt(data.dialNumber)){
+          var position = document.getElementById('position_' + dial.dialNumber.toString());
+          currPosition = parseInt(position.textContent);
+          if(currPosition > -25){
+            position.innerHTML = currPosition - 1;
+            movePiston(dial.dialNumber.toString(), -1);
+            movePiston(dial.firstLink.toString(), dial.firstLinkDir * -1);
+            movePiston(dial.secondLink.toString(), dial.secondLinkDir * -1);
+            var letter = document.getElementById('input_' + dial.dialNumber.toString())
+            letter.innerHTML = prevCharacter(letter.textContent);
+          }
+        }
+      }
+    }
+  });
+
+  channel.bind('complete', function(data) {
+    console.log("completed")
+    var url = "{% url 'puzzlebox:complete' %}";
+    window.location.href = url;
+  });
+
+  console.log("quit snooping you rat fuck")
+  console.log("hink yerself a hard man cause you can open up the console? Cunt.")
+  console.log("close the fucking console you prick")
+  console.log('type "Connor is a pie" in the messenger chat with zero context and i will give you a free use of wish')
+
+  for(let dial of dials){
+    var letter = document.getElementById('input_' + dial.dialNumber.toString())
+    letter.innerHTML = dial.dialLetter;
+    var position = document.getElementById('position_' + dial.dialNumber.toString())
+    position.innerHTML = dial.dialPosition;
+    pistonPosition = dial.pistonPosition;
+    for(let i = 0; i <= 5; i++){
+      if(i === pistonPosition){
+        document.getElementById('piston_' + dial.dialNumber.toString() +"_" + i.toString()).innerHTML = "--- <--"
+      }
+      else{
+        document.getElementById('piston_' + dial.dialNumber.toString() + "_" + i.toString()).innerHTML = "---"
+      }
+    }
+  }
+
+</script>
+</body>
+</html>
+
+{% endblock %}

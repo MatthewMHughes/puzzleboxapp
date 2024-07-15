@@ -1,0 +1,54 @@
+Screen - connect to realm - enter nickname - log-in
+Once logged in - move to puzzle screen
+Text above
+eight dials
+Arrows above / below dials
+Text below
+
+Press Arrow - move letter up or down - update the corresponding moved dial cursor - up to 25 (can't move up any more) down to -25 (can't move down any more) - Update pistons of connected dial - check for complete
+If complete - put congratulations up
+else, update dial to new value
+update piston positions (if visible!)
+
+Press arrows until all pistons are in position 3 - solving clues and taking different gives a "possible" Solution - any solution exists where the cursor positions are in correct position plus all can be moved by any factor of 6 and it is complete
+
+If pistons are visible - display green in the pistons from the left at positon 3 until reach one not in position 3 and make red
+
+Press arrow - update database with new values - sync to other people viewing
+
+Have someone take control - times out after 60 seconds of no activity with the box
+
+Someone else can request control and its up to the other person to relinquish control
+
+Chat room - chat shit get banged - nickname and text
+
+Host on aws - send out aws website - don't buy domain cause who can be arsed
+
+DB - dials - eight
+
+Object has eight dials
+Dials has:
+
+Value (letter) - position (between -25 and 25) - piston position (between 0 and 5)
+Linked Piston - piston direction
+Clicking up arrow moves the letter to next value, and position up 1 - updates the position of linked pistons
+
+TODO - Install Django locally
+
+Put together the basic screen
+
+Add in the buttons
+
+Create the app locally
+
+TOMORROW - Connect to realm app
+Maintain everything in realm - Test with multiple users
+Host on AWS
+
+Sunday - 
+Create nickname logins
+Create control functionality (to remove chase)
+Experiment with scrolling letters
+Create simple chatroom
+Share with boys
+
