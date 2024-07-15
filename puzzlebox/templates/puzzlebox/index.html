@@ -59,6 +59,7 @@
     <h1 id="test"></h1>
   </div>
 </div>
+{% csrf_token %}
 {% load js %}
 <script>
 
@@ -122,8 +123,7 @@
 
   function sendMovePostRequest(dial, moveDir){
     var url = "/puzzlebox/movedial"
-    var csrftoken = getToken('csrftoken')
-    console.log(url, csrftoken, JSON.stringify({'post_data':{"dialNumber": dial.dialNumber, "moveDir": moveDir}}))
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     fetch(url, {
       method:'POST',
       headers:{
@@ -133,11 +133,10 @@
       body:JSON.stringify({'post_data':{"dialNumber": dial.dialNumber, "moveDir": moveDir}}) //JavaScript object of data to POST
       })
     .then((response) => {
-      console.log(response)
-      return response.json(); //converts response to json
+      //return response.json(); //converts response to json
+      return response
     })
     .then((data) => {
-        console.log('data:',data)
     //Perform actions with the response data from the view
     });
   }
@@ -145,10 +144,9 @@
   function sendMovePostMessageRequest(dial, moveDir){
     let username = document.getElementById("username").textContent;
     var url = "/puzzlebox/sendMoveDialMessage"
-    var csrftoken = getToken('csrftoken')
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let event = "moveUp";
     if(moveDir === -1){
-      console.log(moveDir)
       event = "moveDown"
     }
     fetch(url, {
@@ -160,11 +158,10 @@
       body:JSON.stringify({'post_data':{"dialNumber": dial.dialNumber, "event": event, "username": username}}) //JavaScript object of data to POST
       })
     .then((response) => {
-      console.log(response)
-      return response.json(); //converts response to json
+      //return response.json(); //converts response to json
+      return response
     })
     .then((data) => {
-        console.log('data:',data)
     //Perform actions with the response data from the view
     });
   }
@@ -212,16 +209,13 @@
   var channel = pusher.subscribe('puzzlebox');
   
   channel.bind('pusher:subscription_succeeded', function(members) {
-    console.log("binded!")
+    console.log("thats you aw connected to the other users x")
   });
 
   channel.bind('moveUp', function(data) {
-    console.log("moveUp ", data)
     let username = document.getElementById("username").textContent;
     if(data.username !== username){
       for(let dial of dials){
-        console.log(data, data.dialNumber)
-        console.log(dial.dialNumber, parseInt(data.dialNumber), dial.dialNumber === parseInt(data.dialNumber))
         if(dial.dialNumber === parseInt(data.dialNumber)){
           var position = document.getElementById('position_' + dial.dialNumber.toString());
           currPosition = parseInt(position.textContent);
@@ -239,7 +233,6 @@
   });
 
   channel.bind('moveDown', function(data) {
-    console.log("moveDown ", data)
     let username = document.getElementById("username").textContent;
     if(data.username !== username){
       for(let dial of dials){
@@ -260,7 +253,7 @@
   });
 
   channel.bind('complete', function(data) {
-    console.log("completed")
+    console.log("completed you cunt - you best have solved this legit")
     var url = "{% url 'puzzlebox:complete' %}";
     window.location.href = url;
   });
