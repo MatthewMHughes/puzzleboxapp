@@ -55,6 +55,9 @@ class IndexView(generic.ListView):
 def complete(request):
     return render(request,"puzzlebox/complete.html")
 
+def secret(request):
+    return render(request,"puzzlebox/secret.html")
+
 def next_alpha(s):
     return chr((ord(s.upper())+1 - 65) % 26 + 65)
 def prev_alpha(s):
